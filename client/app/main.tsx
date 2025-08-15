@@ -12,7 +12,7 @@ const Main: React.FC = () => {
       <div className='flex-2'>
         <Ide />
       </div>
-      <div className='flex-3 bg-amber-50'>
+      <div className='flex-3'>
         <Diagram />
       </div>
       <div className='flex-2'>
