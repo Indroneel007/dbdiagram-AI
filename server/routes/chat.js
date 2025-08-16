@@ -187,8 +187,16 @@ router.post("/", requireAuth() ,async (req, res)=>{
       res.status(200).json({answer})
 
     }else{
+      const redisKey = `chat:${userId}`
+      const chatHistory = await redisClient.lRange(redisKey, 0, -1);
+
+      const context = chatHistory.map((entry) => {
+        const {message, answer, timestamp} = JSON.parse(entry);
+        return `Question: ${message}\nAnswer: ${answer}\n`
+      }).join("\n\n");
+
       const chain = chatPrompt.pipe(llm).pipe(new StringOutputParser());
-      const answer = await chain.invoke({message})
+      const answer = await chain.invoke({message, context});
 
       res.json({answer})
     }
