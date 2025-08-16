@@ -9,9 +9,13 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@clerk/express": "^1.7.21",
     "@langchain/core": "^0.3.70",
     "@langchain/ollama": "^0.2.3",
     "cors": "^2.8.5",
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "pg": "^8.16.3",
+    "pgsql-parser": "^17.8.2",
+    "redis": "^5.8.1"
   }
 }
