@@ -5,6 +5,7 @@ import { StringOutputParser } from "@langchain/core/output_parsers";
 import pkg from 'pg';
 import { createClient } from 'redis';
 import {requireAuth} from '@clerk/express';
+import parse from 'pgsql-parser';
 
 const { Client } = pkg;
 
@@ -29,13 +30,75 @@ async function init(){
 
 init();
 
-writePrompt = PromptTemplate.fromTemplate(
-  ""
-);
+writePrompt = PromptTemplate.fromTemplate(`
+You are an expert PostgreSQL database assistant.
+Your task is to take natural language input and translate it into valid, optimized PostgreSQL queries.
+Guidelines:
+1. Always return valid PostgreSQL DDL code.
+2. Add primary keys, foreign keys, indexes, and constraints where logically appropriate.
+3. Assume id as a primary key if not specified.
+4. Always return valid PostgreSQL DML code.
+5. Use snake_case for table and column names.
+6. Output only the SQL code block, no explanation.
 
-correctionPrompt = PromptTemplate.fromTemplate("");
+Now write the query for the following message according to given guidelines: {message}
+`);
 
-chatPrompt = PromptTemplate.fromTemplate("Write a {chatType} about {message}");
+correctionPrompt = PromptTemplate.fromTemplate(`
+You are an expert in PostgreSQL. Your task is to correct SQL code using deep thinking when it produces errors.
+
+Input:
+1. The original SQL code
+2. The postgres error message
+3. The user's original request
+
+Guidelines:
+1. Carefully analyze the error message in context.
+2. Use the user's intent to resolve ambiguities.
+3. Return only the corrected PostgreSQL code.
+4. Do not explain the fix.
+5. Always ensure the corrected SQL is valid and executable in PostgreSQL.
+
+Now correct the following SQL code according to given guidelines and error message
+Error message:
+{error}
+
+Question:
+{message}
+`);
+
+chatPrompt = PromptTemplate.fromTemplate(`
+You are an expert PostgreSQL database schema designer.
+When the user describes a table or database structure in natural language, your task is to provide a clear textual explanation of how the table(s) could be designed.
+Use a clear and concise language including table name, column names, data types, and constraints.
+Provide a step by description according to given guidelines and get help of the past chat context provided.
+
+Guidelines:
+1. Do not output SQL code unless explicitly asked.
+2. Instead, respond in natural language, clarifying:
+    - Suggested table names.
+    - Possible column and data type combinations.
+    - rimary keys, foreign keys, and indexes.
+    - Constraints.
+    - Any assumptions you made if the user's description was vague.
+3. Ask clarifying questions if the user request is ambiguous (e.g., "Should emails be unique?" or "Do you want to store timestamps in UTC?").
+4. Use simple but precise explanations that even beginners can follow.
+
+Input Example:
+"I want a table for users with name, email, and signup date."
+
+Output Example:
+"I suggest creating a users table. Each user will have a unique identifier (an id as primary key), a name (string up to 100 characters), an email (string up to 255 characters, ideally unique so the same email can't be reused), and a signup_date (timestamp, defaulting to the current time).
+Do you also want to include password storage or authentication details?"
+
+Now below I am providing you context and Question, try to answer the question with help of context:
+
+Context:
+{context}
+
+Question:
+{message}
+`);
 
 function validateSyntax(sql){
   try {
@@ -53,11 +116,7 @@ async function validateLogic(sql) {
 
   try{
     await client.connect();
-    await client.query("BEGIN");
-
     await client.query(sql);
-
-    await client.query("ROLLBACK");
     return { valid: true };
   } catch(err){
     return { valid: false, error: err.message };
@@ -134,6 +193,8 @@ router.post("/", requireAuth() ,async (req, res)=>{
       res.json({answer})
     }
   }catch (error) {
-    
+    res.status(500).json({ error: error.message });
   }
 })
+
+export default router
