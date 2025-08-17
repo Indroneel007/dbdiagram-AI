@@ -10,17 +10,15 @@ const chatrouter = require("./routes/chat.js");
 const app = express();
 const port = 8567;
 
-app.use(cors({
-    origin: 'http://localhost:3000'
-}))
+app.use(cors())
 
 app.use(clerkMiddleware());
 
 app.use(express.json());
 
-app.get('/', (req, res) => {
-    res.send('Hello Nigga');
-});
+/*app.get('/chat/test', (req, res) => {
+    res.json({msg : "Something working"});
+});*/
 
 app.use('/chat', chatrouter);
 

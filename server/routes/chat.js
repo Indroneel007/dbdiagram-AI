@@ -6,22 +6,26 @@ const { createClient } = require("redis");
 const { requireAuth, getAuth } = require("@clerk/express");
 const parse = require("pgsql-parser");
 const OpenAI = require("openai");
+const {RunnableSequence} = require("@langchain/core/runnables");
+const {ChatOpenAI} = require("@langchain/openai");
 
 const { Client } = pkg;
 
 const router = express.Router();
 
-const llm = new OpenAI({
-  apiKey: process.env.OPENROUTER_API_KEY,
+const llm = new ChatOpenAI({
+  apiKey: process.env.OPENROUTER_API_KEY, // your OpenRouter key (sk-or-v...)
+  model: "moonshotai/kimi-k2:free",     // <-- use the correct slug from OpenRouter
+  temperature: 0,
   configuration: {
-    baseURL: "https://openrouter.ai/api/v1",
-  },
-  modelName: "moonshotai/kimi-k2:free",
-  defaultHeaders: {
-    "HTTP-Referer": "http://localhost:8567",
-    "X-Title": "dbdiagram-AI"
+    baseURL: "https://openrouter.ai/api/v1",  // point to OpenRouter
+    defaultHeaders: {
+      "HTTP-Referer": "http://localhost:8567", // your app URL or domain
+      "X-Title": "dbdiagram-AI"
+    }
   }
-})
+});
+
 
 const redisClient = createClient({
   url: "redis://localhost:6379",
@@ -130,7 +134,12 @@ async function validateLogic(sql) {
   }
 }
 
-router.post("/", requireAuth() ,async (req, res)=>{
+
+router.get("/test", (req, res)=>{
+  res.json({answer: "Atleast router running"})
+})
+
+router.post("/", requireAuth(), async (req, res)=>{
   try {
     const {message, chatType} = req.body;
     const {userId} = getAuth(req);
@@ -143,19 +152,20 @@ router.post("/", requireAuth() ,async (req, res)=>{
     if(!chatType || !message){
       return res.status(400).json({message: "Please provide a chat type and message"})
     }
-
-    if(chatType === "write"){
-
-      //res.status(200).json({answer: "Hello motherfucker"})
+    
+    if(chatType == "write"){
+      
       const chain = writePrompt.pipe(llm).pipe(new StringOutputParser());
       let answer = await chain.invoke({message})
+      console.log(answer)
       //res.json({answer: "Hello motherfucker"})
       const MAX_ATTEMPTS = 3;
       let attempts = 0;
       
+      return res.status(200).json({answer: String(answer)})
       while(attempts < MAX_ATTEMPTS && !validateSyntax(answer).valid){
         attempts++;
-
+        
         const chain = correctionPrompt.pipe(llm).pipe(new StringOutputParser());
         const correction = await chain.invoke({message, error:validateSyntax(answer).error });
 
@@ -164,7 +174,7 @@ router.post("/", requireAuth() ,async (req, res)=>{
           break;
         }
       }
-
+      
       if(!validateSyntax(answer).valid){
         return res.status(200).json({answer})
       }
@@ -175,7 +185,7 @@ router.post("/", requireAuth() ,async (req, res)=>{
 
         const chain = correctionPrompt.pipe(llm).pipe(new StringOutputParser());
         const correction = await chain.invoke({message, error:validateLogic(answer).error });
-
+        
         if(validateLogic(correction).valid){
           answer = correction;
           break;
@@ -193,8 +203,8 @@ router.post("/", requireAuth() ,async (req, res)=>{
 
       res.status(200).json({answer})
 
-    }else{
-      const redisKey = `chat:${userId}`
+   }else{
+      /*const redisKey = `chat:${userId}`
       const chatHistory = await redisClient.lRange(redisKey, 0, -1);
 
       const context = chatHistory.map((entry) => {
@@ -205,7 +215,7 @@ router.post("/", requireAuth() ,async (req, res)=>{
       const chain = chatPrompt.pipe(llm).pipe(new StringOutputParser());
       const answer = await chain.invoke({message, context});
 
-      res.json({answer})
+      res.json({answer})*/
     }
   }catch (error) {
     res.status(500).json({ error: error.message });
