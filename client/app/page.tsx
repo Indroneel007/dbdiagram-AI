@@ -1,14 +1,15 @@
-import { SignedIn, SignedOut } from '@clerk/nextjs';
-import React, { useEffect, useState } from 'react';
+'use client';
+
+import { SignedIn, SignedOut, useAuth } from '@clerk/nextjs';
+import React from 'react';
 import Main from './main';
 import Landing from './landing';
-import { useAuth } from "@clerk/clerk-react";
 
 export default function Home() {
   const { getToken, isLoaded } = useAuth();
-  const [token, setToken] = useState<string | null>(null);
+  const [token, setToken] = React.useState<string | null>(null);
 
-  useEffect(() => {
+  React.useEffect(() => {
     async function fetchToken() {
       if (isLoaded) {
         const t = await getToken();

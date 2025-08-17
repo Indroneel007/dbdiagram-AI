@@ -1,11 +1,11 @@
-import express from 'express';
-import { PromptTemplate } from "@langchain/core/prompts";
-import { StringOutputParser } from "@langchain/core/output_parsers";
-import pkg from 'pg';
-import { createClient } from 'redis';
-import {requireAuth} from '@clerk/express';
-import parse from 'pgsql-parser';
-import OpenAI from "openai";
+const express = require("express");
+const { PromptTemplate } = require("@langchain/core/prompts");
+const { StringOutputParser } = require("@langchain/core/output_parsers");
+const pkg = require("pg");
+const { createClient } = require("redis");
+const { requireAuth, getAuth } = require("@clerk/express");
+const parse = require("pgsql-parser");
+const OpenAI = require("openai");
 
 const { Client } = pkg;
 
@@ -14,11 +14,11 @@ const router = express.Router();
 const llm = new OpenAI({
   apiKey: process.env.OPENROUTER_API_KEY,
   configuration: {
-    baseURL: "https://openrouter.ai/api/v1"
+    baseURL: "https://openrouter.ai/api/v1",
   },
   modelName: "moonshotai/kimi-k2:free",
   defaultHeaders: {
-    "HTTP-Referer": "http://localhost:3000",
+    "HTTP-Referer": "http://localhost:8567",
     "X-Title": "dbdiagram-AI"
   }
 })
@@ -35,7 +35,7 @@ async function init(){
 
 init();
 
-writePrompt = PromptTemplate.fromTemplate(`
+let writePrompt = PromptTemplate.fromTemplate(`
 You are an expert PostgreSQL database assistant.
 Your task is to take natural language input and translate it into valid, optimized PostgreSQL queries.
 Guidelines:
@@ -49,7 +49,7 @@ Guidelines:
 Now write the query for the following message according to given guidelines: {message}
 `);
 
-correctionPrompt = PromptTemplate.fromTemplate(`
+let correctionPrompt = PromptTemplate.fromTemplate(`
 You are an expert in PostgreSQL. Your task is to correct SQL code using deep thinking when it produces errors.
 
 Input:
@@ -72,7 +72,7 @@ Question:
 {message}
 `);
 
-chatPrompt = PromptTemplate.fromTemplate(`
+let chatPrompt = PromptTemplate.fromTemplate(`
 You are an expert PostgreSQL database schema designer.
 When the user describes a table or database structure in natural language, your task is to provide a clear textual explanation of how the table(s) could be designed.
 Use a clear and concise language including table name, column names, data types, and constraints.
@@ -133,7 +133,7 @@ async function validateLogic(sql) {
 router.post("/", requireAuth() ,async (req, res)=>{
   try {
     const {message, chatType} = req.body;
-    const userId = req.auth.userId;
+    const {userId} = getAuth(req);
 
     //Error Message
     if (!userId) {
@@ -145,9 +145,11 @@ router.post("/", requireAuth() ,async (req, res)=>{
     }
 
     if(chatType === "write"){
+
+      //res.status(200).json({answer: "Hello motherfucker"})
       const chain = writePrompt.pipe(llm).pipe(new StringOutputParser());
       let answer = await chain.invoke({message})
-
+      //res.json({answer: "Hello motherfucker"})
       const MAX_ATTEMPTS = 3;
       let attempts = 0;
       
@@ -210,4 +212,4 @@ router.post("/", requireAuth() ,async (req, res)=>{
   }
 })
 
-export default router
+module.exports = router
