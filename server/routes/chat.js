@@ -1,22 +1,27 @@
 import express from 'express';
-import { Ollama } from "@langchain/ollama";
 import { PromptTemplate } from "@langchain/core/prompts";
 import { StringOutputParser } from "@langchain/core/output_parsers";
 import pkg from 'pg';
 import { createClient } from 'redis';
 import {requireAuth} from '@clerk/express';
 import parse from 'pgsql-parser';
+import OpenAI from "openai";
 
 const { Client } = pkg;
 
 const router = express.Router();
 
-const llm = new Ollama({
-  model: "llama3", // Default value
-  temperature: 0,
-  maxRetries: 2,
-  baseUrl: "http://localhost:11434"
-});
+const llm = new OpenAI({
+  apiKey: process.env.OPENROUTER_API_KEY,
+  configuration: {
+    baseURL: "https://openrouter.ai/api/v1"
+  },
+  modelName: "moonshotai/kimi-k2:free",
+  defaultHeaders: {
+    "HTTP-Referer": "http://localhost:3000",
+    "X-Title": "dbdiagram-AI"
+  }
+})
 
 const redisClient = createClient({
   url: "redis://localhost:6379",
@@ -192,7 +197,7 @@ router.post("/", requireAuth() ,async (req, res)=>{
 
       const context = chatHistory.map((entry) => {
         const {message, answer, timestamp} = JSON.parse(entry);
-        return `Question: ${message}\nAnswer: ${answer}\n`
+        return `User: ${message}\nAssistant: ${answer}\n`
       }).join("\n\n");
 
       const chain = chatPrompt.pipe(llm).pipe(new StringOutputParser());
