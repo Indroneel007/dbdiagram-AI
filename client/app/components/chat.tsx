@@ -103,7 +103,7 @@ const Chat: React.FC<setIDEProps> = ({setIdeAnswer}) => {
 
   return(
     <>
-      <div className='flex flex-col h-screen w-full max-w-200 mx-auto mb-3'>
+      <div className='flex flex-col h-screen w-full max-w-200'>
         <div>
           <ScrollArea className='mb-4 pr-4' style={{ height: 'calc(100vh - 150px)' }}>
             <div className='flex flex-col gap-2'>
@@ -122,17 +122,17 @@ const Chat: React.FC<setIDEProps> = ({setIdeAnswer}) => {
             <div ref={messagesEndRef} />
           </ScrollArea>
         </div>
-        <div className='flex flex-col h-30 w-full border rounded-xl bg-zinc-600 p-2 fixed bottom-0 right-0 max-w-100 mx-auto mb-3'>
+        <div className='flex flex-col h-25 w-full border rounded-xl bg-zinc-600 p-2 fixed bottom-0 right-0 max-w-104 mx-auto mb-3 mr-4'>
           <div className='flex-3 flex'>
             <Input type='text' placeholder='Ask me anything' className='mr-2 text-white' value={message} onChange={(e) => setMessage(e.target.value)} />
             <Button variant="secondary" onClick={handleSubmit}>
               <SendHorizonal />
             </Button>
           </div>
-          <div className='flex-2 justify-end'>
-            <ToggleGroup type="single" defaultValue="write" className='bg-zinc-600 w-40 p-2' aria-label="Text alignment" onValueChange={(val)=>val && setchatType(val)}>
-              <ToggleGroupItem value="write" className='text-white'>Write</ToggleGroupItem>
-              <ToggleGroupItem value="chat" className='text-white'>Chat</ToggleGroupItem>
+          <div className='flex-2 justify-end h-5'>
+            <ToggleGroup type="single" defaultValue="write" className='bg-zinc-600 w-40 h-5 text-xs' aria-label="Text alignment" onValueChange={(val)=>val && setchatType(val)}>
+              <ToggleGroupItem value="write" className='text-white text-xs'>Write</ToggleGroupItem>
+              <ToggleGroupItem value="chat" className='text-white text-xs'>Chat</ToggleGroupItem>
             </ToggleGroup>
           </div>
         </div>
