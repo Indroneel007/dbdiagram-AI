@@ -215,7 +215,7 @@ router.post("/", requireAuth(), async (req, res)=>{
       const chain = chatPrompt.pipe(llm).pipe(new StringOutputParser());
       const answer = await chain.invoke({message, context});
 
-      res.json({target:req.chatType, answer})
+      res.json({target:chatType, answer})
     }
   }catch (error) {
     res.status(500).json({ error: error.message });

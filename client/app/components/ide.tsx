@@ -1,7 +1,10 @@
 'use cliet'
 import React from 'react'
 
-const Ide: React.FC = () => {
+type IdeProps = {
+  ideAnswer: string;
+};
+const Ide: React.FC<IdeProps> = ({ideAnswer}) => {
   return(
     <>
       <h1>This is where our code will be written</h1>

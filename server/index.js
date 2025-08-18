@@ -10,7 +10,13 @@ const chatrouter = require("./routes/chat.js");
 const app = express();
 const port = 8567;
 
-app.use(cors())
+app.use(cors(
+    {
+        origin: "http://localhost:3000",
+        methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+        credentials: true
+    }
+))
 
 app.use(clerkMiddleware());
 
