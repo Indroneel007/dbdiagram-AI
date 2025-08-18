@@ -8,9 +8,9 @@ const Main: React.FC = () => {
   
   
   return(
-    <div className='flex h-screen overflow-hidden'>
+    <div className='flex h-screen overflow-hidden bg-zinc-600'>
       <div className='flex-2'>
-        <Ide />
+          <Ide />
       </div>
       <div className='flex-3'>
         <Diagram />

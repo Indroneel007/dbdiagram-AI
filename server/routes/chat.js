@@ -162,7 +162,7 @@ router.post("/", requireAuth(), async (req, res)=>{
       const MAX_ATTEMPTS = 3;
       let attempts = 0;
       
-      return res.status(200).json({answer: String(answer)})
+      //return res.status(200).json({answer: String(answer)})
       while(attempts < MAX_ATTEMPTS && !validateSyntax(answer).valid){
         attempts++;
         
@@ -204,7 +204,7 @@ router.post("/", requireAuth(), async (req, res)=>{
       res.status(200).json({answer})
 
    }else{
-      /*const redisKey = `chat:${userId}`
+      const redisKey = `chat:${userId}`
       const chatHistory = await redisClient.lRange(redisKey, 0, -1);
 
       const context = chatHistory.map((entry) => {
@@ -215,7 +215,7 @@ router.post("/", requireAuth(), async (req, res)=>{
       const chain = chatPrompt.pipe(llm).pipe(new StringOutputParser());
       const answer = await chain.invoke({message, context});
 
-      res.json({answer})*/
+      res.json({answer})
     }
   }catch (error) {
     res.status(500).json({ error: error.message });
