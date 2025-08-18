@@ -30,9 +30,10 @@ const Chat: React.FC = () => {
 
       const data = await response.json();
 
-      if(chatType === "chat")setChatAnswer(data.answer || "No answer received");
-      else if(chatType === "write"){
+      if(data.target==="chat")setChatAnswer(data.answer || "No answer received");
+      else if(data.target === "write"){
         setIdeAnswer(data.answer || "No answer received");
+        
       }
       setMessage("");
     } catch (error) {

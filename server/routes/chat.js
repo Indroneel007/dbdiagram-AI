@@ -201,7 +201,7 @@ router.post("/", requireAuth(), async (req, res)=>{
       const redisKey = `chat:${userId}`
       await redisClient.rPush(redisKey, JSON.stringify(chatEntry));
 
-      res.status(200).json({answer})
+      res.status(200).json({target: req.chatType, answer})
 
    }else{
       const redisKey = `chat:${userId}`
@@ -215,7 +215,7 @@ router.post("/", requireAuth(), async (req, res)=>{
       const chain = chatPrompt.pipe(llm).pipe(new StringOutputParser());
       const answer = await chain.invoke({message, context});
 
-      res.json({answer})
+      res.json({target:req.chatType, answer})
     }
   }catch (error) {
     res.status(500).json({ error: error.message });
