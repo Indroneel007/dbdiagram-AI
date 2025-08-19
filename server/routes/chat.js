@@ -176,20 +176,24 @@ router.post("/", requireAuth(), async (req, res)=>{
       }
       
       if(!validateSyntax(answer).valid){
-        return res.status(200).json({answer})
+        return res.status(200).json({ target: chatType, answer })
       }
 
       attempts = 0;
-      while(attempts < MAX_ATTEMPTS && !validateLogic(answer).valid){
+      while (attempts < MAX_ATTEMPTS) {
+        const logic = await validateLogic(answer);
+        if (logic.valid) break;
         attempts++;
 
         const chain = correctionPrompt.pipe(llm).pipe(new StringOutputParser());
-        const correction = await chain.invoke({message, error:validateLogic(answer).error });
-        
-        if(validateLogic(correction).valid){
+        const correction = await chain.invoke({ message, error: logic.error });
+
+        const correctionLogic = await validateLogic(correction);
+        if (correctionLogic.valid) {
           answer = correction;
           break;
         }
+        // if not valid, loop continues until attempts exhausted
       }
 
       const chatEntry = {
@@ -201,7 +205,7 @@ router.post("/", requireAuth(), async (req, res)=>{
       const redisKey = `chat:${userId}`
       await redisClient.rPush(redisKey, JSON.stringify(chatEntry));
 
-      res.status(200).json({target: req.chatType, answer})
+      res.status(200).json({target: chatType, answer})
 
    }else{
       const redisKey = `chat:${userId}`

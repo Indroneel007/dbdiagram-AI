@@ -75,6 +75,7 @@ const Chat: React.FC<setIDEProps> = ({setIdeAnswer}) => {
       //console.log("RAW RESPONSE:", data);
 
       if(data.target==="chat"){
+        console.log('Chat response:', data.answer);
         setChatAnswer(data.answer || "No answer received");
         setMessages((prev)=>[...prev, {
           id: Date.now().toString(),
@@ -83,7 +84,8 @@ const Chat: React.FC<setIDEProps> = ({setIdeAnswer}) => {
           timestamp: new Date(),
         }])
       }
-      else if(data.target === "write"){
+      else if(data.target==="write"){
+        console.log('Chat response:', data.answer);
         setIdeAnswer(data.answer || "No answer received");
       }
       setMessage("");

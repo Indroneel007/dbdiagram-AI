@@ -1,4 +1,4 @@
-'use cliet'
+'use client'
 import React from 'react'
 import CodeMirror from '@uiw/react-codemirror';
 import {PostgreSQL, sql} from '@codemirror/lang-sql';
@@ -18,26 +18,22 @@ const Ide: React.FC<IdeProps> = ({ideAnswer, setIdeAnswer}) => {
 */
   return(
     <>
-      <div className='h-screen bg-zinc-900 w-full'>
+      <div className='h-screen bg-zinc-900 w-full flex'>
         <CodeMirror
-          id="postgres-editor"         // 👈 unique id
-          value={ideAnswer}
-          height='100%'
-          extensions={[
-          sql({
-            dialect: PostgreSQL,  // 👈 PostgreSQL dialect
-          }),
-        ]}
-        theme="dark"
-        editable={true}
-        basicSetup={{
-          lineNumbers: true,
-          highlightActiveLine: true,
-        }}
-        onChange={(value) => {
-          setIdeAnswer(value);
-        }}
-        />  
+  value={ideAnswer}
+  className='flex-1'
+  height="100%"
+  extensions={[sql({ dialect: PostgreSQL })]}
+  theme="dark"
+  editable={true}
+  basicSetup={{
+    lineNumbers: true,
+    highlightActiveLine: true,
+  }}
+  onChange={(value) => {
+    setIdeAnswer(value); // 👈 updates parent directly
+  }}
+/>  
       </div>      
     </>
   )
