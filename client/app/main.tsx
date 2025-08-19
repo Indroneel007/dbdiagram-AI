@@ -10,7 +10,7 @@ const Main: React.FC = () => {
   return(
     <div className='flex h-screen overflow-hidden bg-zinc-600'>
       <div className='flex-2'>
-          <Ide ideAnswer={ideAnswer} />
+          <Ide ideAnswer={ideAnswer} setIdeAnswer={setIdeAnswer} />
       </div>
       <div className='flex-3'>
         <Diagram />
