@@ -134,6 +134,12 @@ async function validateLogic(sql) {
   }
 }
 
+function cleanSQL(output) {
+  return output
+    .replace(/```sql\s*/g, "")  // remove ```sql
+    .replace(/```/g, "");       // remove closing ```
+}
+
 
 router.get("/test", (req, res)=>{
   res.json({answer: "Atleast router running"})
@@ -157,6 +163,8 @@ router.post("/", requireAuth(), async (req, res)=>{
       
       const chain = writePrompt.pipe(llm).pipe(new StringOutputParser());
       let answer = await chain.invoke({message})
+
+      answer = cleanSQL(answer);
       console.log(answer)
       //res.json({answer: "Hello motherfucker"})
       const MAX_ATTEMPTS = 3;
