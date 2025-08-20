@@ -13,6 +13,11 @@ const Diagram: React.FC<{ nodes: Node[], edges: Edge[] }> = ({ nodes, edges }) =
     [],
   );
 
+  // Keep local state in sync when parent updates nodes (e.g., after Generate)
+  React.useEffect(() => {
+    setUpdatedNode(nodes);
+  }, [nodes]);
+
   return (
     <div style={{ height: '100%', width: '100%' }}>
       <ReactFlow
