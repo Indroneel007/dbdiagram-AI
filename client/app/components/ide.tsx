@@ -4,31 +4,15 @@ import CodeMirror from '@uiw/react-codemirror';
 import {PostgreSQL, sql} from '@codemirror/lang-sql';
 import { Button } from '@/components/ui/button';
 import { Table2 } from 'lucide-react';
-import {parse} from 'pgsql-ast-parser'
-import { Edge, Node } from '@xyflow/react';
-import { extractTables } from '../utils/table';
+import { Edge, Node, MarkerType } from '@xyflow/react';
+import { extractSchemaFromSQL } from '../utils/table';
 
-// Table structure we want in frontend
+// Table structure we want in frontend (kept for clarity)
 interface Table {
   id: string;
   name: string;
   columns: string[];
 }
-
-// Minimal AST types for CREATE TABLE
-interface ASTColumn {
-  name: { name: string };
-}
-
-interface ASTCreateTable {
-  type: "create table";
-  name: { name: string };
-  columns: ASTColumn[];
-}
-
-// The parse() function returns (ASTCreateTable | OtherStatements)[]
-// If you don’t want to define all statements, just use a union with `unknown`.
-type ASTNode = ASTCreateTable;
 
 type IdeProps = {
   ideAnswer: string
@@ -49,18 +33,43 @@ const Ide: React.FC<IdeProps> = ({ideAnswer, setIdeAnswer, setNodes, setEdges}) 
 */
   const handleGenerate = () => {
     try {
-      const ast = parse(ideAnswer) as ASTNode[]; // parser returns unknown; cast to our minimal type
-      const tables: Table[] = extractTables(ast);
+      // Use simple SQL scanner to get tables and relations
+      const { tables, relations } = extractSchemaFromSQL(ideAnswer);
+      console.log('Parsed tables:', tables);
+      console.log('Parsed relations:', relations);
 
-      const newNodes = tables.map((table, i) => ({
+      const newNodes: Node[] = tables.map((table, i) => ({
         id: table.id,
         type: "tableNode",
-        position: { x: 100 + i * 250, y: 150 },
+        position: { x: 100 + (i % 3) * 280, y: 100 + Math.floor(i / 3) * 220 },
         data: { label: table.name, columns: table.columns },
       }));
 
+      // Map table name -> node id
+      const nameToId = new Map<string, string>();
+      for (const t of tables) nameToId.set(t.name, t.id);
+
+      const newEdges: Edge[] = relations
+        .map((rel, idx) => {
+          const sourceId = nameToId.get(rel.sourceTable);
+          const targetId = nameToId.get(rel.targetTable);
+          if (!sourceId || !targetId) return null;
+          return {
+            id: `e-${idx}-${rel.sourceTable}.${rel.sourceColumn}->${rel.targetTable}.${rel.targetColumn}`,
+            source: sourceId,
+            target: targetId,
+            sourceHandle: `col-${rel.sourceColumn}`,
+            targetHandle: `col-${rel.targetColumn}`,
+            label: `${rel.sourceColumn} → ${rel.targetTable}.${rel.targetColumn}`,
+            markerEnd: { type: MarkerType.ArrowClosed },
+            style: { strokeWidth: 1.5 },
+            animated: false,
+          } as Edge;
+        })
+        .filter(Boolean) as Edge[];
+
       setNodes(newNodes);
-      setEdges([]);
+      setEdges(newEdges);
     } catch (err) {
       console.error("Parse error:", err);
     }

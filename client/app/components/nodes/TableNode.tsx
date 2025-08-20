@@ -1,6 +1,6 @@
 "use client"
 import React from "react";
-import type { NodeProps } from "@xyflow/react";
+import { Handle, Position, type NodeProps } from "@xyflow/react";
 
 // Expects node.data = { label: string, columns?: string[] }
 const TableNode: React.FC<NodeProps> = ({ data }) => {
@@ -16,6 +16,9 @@ const TableNode: React.FC<NodeProps> = ({ data }) => {
       overflow: "hidden",
       fontFamily: "Inter, system-ui, Avenir, Helvetica, Arial, sans-serif"
     }}>
+      {/* Target handle (incoming edges) */}
+      <Handle type="target" position={Position.Left} style={{ background: "#38bdf8", width: 8, height: 8 }} />
+
       <div style={{
         fontWeight: 600,
         fontSize: 14,
@@ -32,20 +35,37 @@ const TableNode: React.FC<NodeProps> = ({ data }) => {
           <ul style={{ listStyle: "none", margin: 0, padding: 0 }}>
             {columns.map((col: string, idx: number) => (
               <li key={idx} style={{
+                position: 'relative',
                 fontSize: 12,
                 color: "#3f3f46",
-                padding: "4px 6px",
+                padding: "6px 6px",
                 borderRadius: 4,
                 border: "1px solid #f1f5f9",
                 marginBottom: 4,
                 background: "#fafafa"
               }}>
-                {col}
+                {/* Per-column handles: left = target, right = source */}
+                <Handle
+                  id={`col-${col}`}
+                  type="target"
+                  position={Position.Left}
+                  style={{ background: "#60a5fa", width: 8, height: 8 }}
+                />
+                <span>{col}</span>
+                <Handle
+                  id={`col-${col}`}
+                  type="source"
+                  position={Position.Right}
+                  style={{ background: "#34d399", width: 8, height: 8 }}
+                />
               </li>
             ))}
           </ul>
         )}
       </div>
+
+      {/* Source handle (outgoing edges) */}
+      <Handle type="source" position={Position.Right} style={{ background: "#10b981", width: 8, height: 8 }} />
     </div>
   );
 };

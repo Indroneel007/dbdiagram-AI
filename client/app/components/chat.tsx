@@ -105,34 +105,37 @@ const Chat: React.FC<setIDEProps> = ({setIdeAnswer}) => {
 
   return(
     <>
-      <div className='flex flex-col h-screen w-full max-w-200'>
-        <div>
-          <ScrollArea className='mb-4 pr-4' style={{ height: 'calc(100vh - 150px)' }}>
-            <div className='flex flex-col gap-2'>
+      <div className='flex flex-col h-full w-full'>
+        {/* Messages area */}
+        <div className='flex-1 min-h-0'>
+          <ScrollArea className='h-full pr-2'>
+            <div className='flex flex-col gap-2 p-2'>
               {messages.map((msg) => (
-                <div key={msg.id} className={`p-2 rounded-lg ${msg.role === 'user' ? 'bg-blue-500 text-white self-end' : 'bg-gray-300 text-black self-start'}`}>
-                  <p>{msg.content}</p>
-                  <span className='text-xs text-gray-500'>{new Date(msg.timestamp).toLocaleTimeString()}</span>
+                <div key={msg.id} className={`p-2 rounded-lg max-w-[85%] ${msg.role === 'user' ? 'bg-blue-500 text-white self-end' : 'bg-gray-300 text-black self-start'}`}>
+                  <p className='whitespace-pre-wrap break-words'>{msg.content}</p>
+                  <span className='text-xs opacity-70'>{new Date(msg.timestamp).toLocaleTimeString()}</span>
                 </div>
               ))}
               {chatAnswer && (
-                <div className='p-2 rounded-lg bg-gray-300 text-black self-start'>
-                  <p>{chatAnswer}</p>
+                <div className='p-2 rounded-lg bg-gray-300 text-black self-start max-w-[85%]'>
+                  <p className='whitespace-pre-wrap break-words'>{chatAnswer}</p>
                 </div>
               )}
+              <div ref={messagesEndRef} />
             </div>
-            <div ref={messagesEndRef} />
           </ScrollArea>
         </div>
-        <div className='flex flex-col h-25 w-full border rounded-xl bg-zinc-600 p-2 fixed bottom-0 right-0 max-w-104 mx-auto mb-3 mr-4'>
-          <div className='flex-3 flex'>
-            <Input type='text' placeholder='Ask me anything' className='mr-2 text-white' value={message} onChange={(e) => setMessage(e.target.value)} />
+
+        {/* Composer */}
+        <div className='border-t bg-zinc-700 p-2'>
+          <div className='flex items-center gap-2'>
+            <Input type='text' placeholder='Ask me anything' className='text-white' value={message} onChange={(e) => setMessage(e.target.value)} onKeyDown={handleKeyDown} />
             <Button variant="secondary" onClick={handleSubmit}>
               <SendHorizonal />
             </Button>
           </div>
-          <div className='flex-2 justify-end h-5'>
-            <ToggleGroup type="single" defaultValue="write" className='bg-zinc-600 w-40 h-5 text-xs' aria-label="Text alignment" onValueChange={(val)=>val && setchatType(val)}>
+          <div className='flex justify-end mt-2'>
+            <ToggleGroup type="single" defaultValue="write" className='bg-zinc-600 h-7 text-xs' aria-label="Mode" onValueChange={(val)=>val && setchatType(val)}>
               <ToggleGroupItem value="write" className='text-white text-xs'>Write</ToggleGroupItem>
               <ToggleGroupItem value="chat" className='text-white text-xs'>Chat</ToggleGroupItem>
             </ToggleGroup>
