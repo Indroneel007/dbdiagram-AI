@@ -1,15 +1,24 @@
 'use client'
-import { Background, Controls, Edge, Node, ReactFlow } from "@xyflow/react"
+import { applyNodeChanges, Background, Controls, Edge, Node, NodeChange, ReactFlow } from "@xyflow/react"
 import React from "react"
 import TableNode from "./nodes/TableNode"
 import "@xyflow/react/dist/style.css"
 
 const Diagram: React.FC<{ nodes: Node[], edges: Edge[] }> = ({ nodes, edges }) => {
+  const [updatedNode, setUpdatedNode] = React.useState<Node[]>(nodes)
+  //const [updatedEdge, setUpdatedEdge] = React.useState<Edge[]>(edges)
+
+  const onNodesChange = React.useCallback(
+    (changes: NodeChange[]) => setUpdatedNode((nodesSnapshot) => applyNodeChanges(changes, nodesSnapshot)),
+    [],
+  );
+
   return (
     <div style={{ height: '100%', width: '100%' }}>
       <ReactFlow
-        nodes={nodes}
+        nodes={updatedNode}
         edges={edges}
+        onNodesChange={onNodesChange}
         nodeTypes={{ tableNode: TableNode }}
         fitView
       >
