@@ -58,7 +58,7 @@ export function extractSchemaFromSQL(sql: string): { tables: Table[]; relations:
   let currentTable: string | null = null;
   let currentColumns: string[] = [];
   let blockBuf: string[] = [];
-  let tableIndex = 0; // kept for legacy, but we will prefer stable ids based on name
+  const tableIndex = 0; // kept for legacy, but we will prefer stable ids based on name
 
   const startTableRe = /^\s*create\s+table\s+"?([a-zA-Z_][\w]*)"?\s*\(/i;
   // End of table only when the line is just ")" (optionally followed by ;) and nothing else,

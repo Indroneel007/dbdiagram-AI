@@ -28,7 +28,7 @@ const llm = new ChatOpenAI({
 
 
 const redisClient = createClient({
-  url: "redis://localhost:6379",
+  url: process.env.REDIS_URL,
 });
 
 redisClient.on("error", (err) => console.log("Redis Client Error", err));
@@ -46,7 +46,6 @@ Guidelines:
 1. Always return valid PostgreSQL DDL code.
 2. Add primary keys, foreign keys, indexes, and constraints where logically appropriate.
 3. Assume id as a primary key if not specified.
-4. Always return valid PostgreSQL DML code.
 5. Use snake_case for table and column names.
 6. Output only the SQL code block, no explanation.
 
@@ -120,7 +119,7 @@ function validateSyntax(sql){
 
 async function validateLogic(sql) {
   const client = new Client({
-    connectionString: "postgresql://root:rootpassword@localhost:5433/simple_bank_2?sslmode=disable"
+    connectionString: process.env.POSTGRES_URL
   })
 
   try{

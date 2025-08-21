@@ -10,6 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "@clerk/express": "^1.7.21",
+    "@langchain/anthropic": "^0.3.26",
     "@langchain/core": "^0.3.70",
     "@langchain/ollama": "^0.2.3",
     "@langchain/openai": "^0.6.7",
