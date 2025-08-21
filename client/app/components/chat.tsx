@@ -52,7 +52,7 @@ const Chat: React.FC<setIDEProps> = ({setIdeAnswer}) => {
     const token = await getToken({ template: 'db-diagram' });
 
     try {
-      const response = await fetch('http://localhost:8567/chat/',{
+      const response = await fetch('https://dbdiagram-ai.onrender.com/chat/',{
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
