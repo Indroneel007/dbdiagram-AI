@@ -12,7 +12,7 @@ const port = 8567;
 
 app.use(cors(
     {
-        origin: "http://localhost:3000",
+        origin: "https://dbdiagram-ai-azet.vercel.app/",
         methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
         credentials: true
     }
