@@ -12,7 +12,7 @@ const port = 8567;
 
 app.use(cors(
     {
-        origin: "https://dbdiagram-ai-azet.vercel.app/",
+        origin: "https://dbdiagram-ai-azet.vercel.app",
         methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
         credentials: true
     }
